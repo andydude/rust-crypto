@@ -18,3 +18,7 @@ opt-level = 2
 [dependencies]
 time = "*"
 rustc-serialize = "*"
+
+[[bin]]
+name = "dgstsum"
+path = "src/bin/dgstsum.rs"

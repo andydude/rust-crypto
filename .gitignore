@@ -8,7 +8,6 @@
 
 # rustpkg files
 build
-bin
 .rust
 
 # Output library files
