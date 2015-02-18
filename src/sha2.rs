@@ -24,50 +24,6 @@ Algorithmically, there are only 2 core algorithms: `Sha256` and `Sha512`.
 All other algorithms are just applications of these with different initial hash
 values, and truncated to different digest bit lengths.
 
-# Usage
-
-An example of using `Sha256` is:
-
-```rust
-use self::crypto::digest::Digest;
-use self::crypto::sha2::Sha256;
-
-// create a Sha256 object
-let mut hasher = Sha256::new();
-
-// write input message
-hasher.input_str("hello world");
-
-// read hash digest
-let hex = hasher.result_str();
-
-assert_eq!(hex.as_slice(),
-           concat!("b94d27b9934d3e08a52e52d7da7dabfa",
-                   "c484efe37a5380ee9088f7ace2efcde9"));
-```
-
-An example of using `Sha512` is:
-
-```rust
-use self::crypto::digest::Digest;
-use self::crypto::sha2::Sha512;
-
-// create a Sha512 object
-let mut hasher = Sha512::new();
-
-// write input message
-hasher.input_str("hello world");
-
-// read hash digest
-let hex = hasher.result_str();
-
-assert_eq!(hex.as_slice(),
-           concat!("309ecc489c12d6eb4cc40f50c902f2b4",
-                   "d0ed77ee511a7c7a9bcd3ca86d4cd86f",
-                   "989dd35bc5ff499670da34255b45b0cf",
-                   "d830e81f605dcf7dc5542e93ae9cd76f"));
-```
-
  */
 
 use std::simd::{u32x4, u64x2};
@@ -644,6 +600,7 @@ pub fn sha512_digest_block(state: &mut [u64; 8], block: &[u8/*; 128*/]) {
 
 // A structure that represents that state of a digest computation for the SHA-2 512 family
 // of digest functions
+#[derive(Copy)]
 struct Engine512State {
     h: [u64; 8]
 }
@@ -757,6 +714,28 @@ impl Engine512 {
 
 
 /// The SHA-512 hash algorithm with the SHA-512 initial hash value.
+///
+/// ## Example of using `Sha512`
+///
+/// ```rust
+/// use self::crypto::digest::Digest;
+/// use self::crypto::sha2::Sha512;
+///
+/// // create a Sha512 object
+/// let mut hasher = Sha512::new();
+///
+/// // write input message
+/// hasher.input_str("hello world");
+///
+/// // read hash digest
+/// let hex = hasher.result_str();
+///
+/// assert_eq!(hex.as_slice(),
+///            concat!("309ecc489c12d6eb4cc40f50c902f2b4",
+///                    "d0ed77ee511a7c7a9bcd3ca86d4cd86f",
+///                    "989dd35bc5ff499670da34255b45b0cf",
+///                    "d830e81f605dcf7dc5542e93ae9cd76f"));
+/// ```
 pub struct Sha512 {
     engine: Engine512
 }
@@ -1081,6 +1060,26 @@ impl Engine256 {
 
 
 /// The SHA-256 hash algorithm with the SHA-256 initial hash value.
+///
+/// ## Example of using `Sha256`
+///
+/// ```rust
+/// use self::crypto::digest::Digest;
+/// use self::crypto::sha2::Sha256;
+///
+/// // create a Sha256 object
+/// let mut hasher = Sha256::new();
+///
+/// // write input message
+/// hasher.input_str("hello world");
+///
+/// // read hash digest
+/// let hex = hasher.result_str();
+///
+/// assert_eq!(hex.as_slice(),
+///            concat!("b94d27b9934d3e08a52e52d7da7dabfa",
+///                    "c484efe37a5380ee9088f7ace2efcde9"));
+/// ```
 #[derive(Copy)]
 pub struct Sha256 {
     engine: Engine256

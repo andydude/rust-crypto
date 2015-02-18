@@ -23,23 +23,7 @@ in hexadecimal form.
 
 The `Sha1` object may be reused to create multiple hashes by calling
 the `reset()` method. These traits are implemented by all hash digest
-algorithms that implement the `Digest` trait. An example of use is:
-
-```rust
-use self::crypto::digest::Digest;
-use self::crypto::sha1::Sha1;
-
-// create a Sha1 object
-let mut hasher = Sha1::new();
-
-// write input message
-hasher.input_str("hello world");
-
-// read hash digest
-let hex = hasher.result_str();
-
-assert_eq!(hex.as_slice(), "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
-```
+algorithms that implement the `Digest` trait.
 
 # Mathematics
 
@@ -359,6 +343,25 @@ fn mk_result(st: &mut Sha1, rs: &mut [u8]) {
 }
 
 /// Structure representing the state of a Sha1 computation
+///
+/// ## Example of using `Sha1`
+///
+/// ```rust
+/// use self::crypto::digest::Digest;
+/// use self::crypto::sha1::Sha1;
+///
+/// // create a Sha1 object
+/// let mut hasher = Sha1::new();
+///
+/// // write input message
+/// hasher.input_str("hello world");
+///
+/// // read hash digest
+/// let hex = hasher.result_str();
+///
+/// assert_eq!(hex.as_slice(), "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
+/// ```
+///
 #[derive(Copy)]
 pub struct Sha1 {
     h: [u32; STATE_LEN],
@@ -368,7 +371,7 @@ pub struct Sha1 {
 }
 
 impl Sha1 {
-    /// Construct a `sha` object
+    /// Construct an new instance of a SHA-1 digest.
     pub fn new() -> Sha1 {
         let mut st = Sha1 {
             h: [0u32; STATE_LEN],
