@@ -13,6 +13,7 @@
 #![feature(old_io)]
 #![cfg_attr(test, feature(test))]
 
+extern crate bswap;
 extern crate rand;
 extern crate "rustc-serialize" as serialize;
 extern crate time;

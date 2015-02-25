@@ -9,156 +9,72 @@
 // except according to those terms.
 
 use std;
-use std::{io, mem};
+use std::io;
 use std::num::{Int, UnsignedInt};
-use std::ptr;
 use std::slice::bytes::{MutableByteVector, copy_memory};
 
 use buffer::{ReadBuffer, WriteBuffer, BufferResult};
 use buffer::BufferResult::{BufferUnderflow, BufferOverflow};
 use symmetriccipher::{SynchronousStreamCipher, SymmetricCipherError};
+use bswap;
 
 /// Write a u64 into a vector, which must be 8 bytes long. The value is written in big-endian
 /// format.
-pub fn write_u64_be(dst: &mut[u8], mut input: u64) {
-    assert!(dst.len() == 8);
-    input = input.to_be();
-    unsafe {
-        let tmp = &input as *const _ as *const u8;
-        ptr::copy_nonoverlapping_memory(dst.get_unchecked_mut(0), tmp, 8);
-    }
+pub fn write_u64_be(dst: &mut[u8], input: u64) {
+    bswap::beu64::encode(dst, input);
 }
 
 /// Write a u64 into a vector, which must be 8 bytes long. The value is written in little-endian
 /// format.
-pub fn write_u64_le(dst: &mut[u8], mut input: u64) {
-    assert!(dst.len() == 8);
-    input = input.to_le();
-    unsafe {
-        let tmp = &input as *const _ as *const u8;
-        ptr::copy_nonoverlapping_memory(dst.get_unchecked_mut(0), tmp, 8);
-    }
+pub fn write_u64_le(dst: &mut[u8], input: u64) {
+    bswap::leu64::encode(dst, input);
 }
 
 /// Write a vector of u64s into a vector of bytes. The values are written in little-endian format.
 pub fn write_u64v_le(dst: &mut[u8], input: &[u64]) {
-    assert!(dst.len() == 8 * input.len());
-    unsafe {
-        let mut x: *mut u8 = dst.get_unchecked_mut(0);
-        let mut y: *const u64 = input.get_unchecked(0);
-        for _ in range(0, input.len()) {
-            let tmp = (*y).to_le();
-            ptr::copy_nonoverlapping_memory(x, &tmp as *const _ as *const u8, 8);
-            x = x.offset(8);
-            y = y.offset(1);
-        }
-    }
+    bswap::leu64::encode_slice(dst, input);
 }
 
 /// Write a u32 into a vector, which must be 4 bytes long. The value is written in big-endian
 /// format.
-pub fn write_u32_be(dst: &mut [u8], mut input: u32) {
-    assert!(dst.len() == 4);
-    input = input.to_be();
-    unsafe {
-        let tmp = &input as *const _ as *const u8;
-        ptr::copy_nonoverlapping_memory(dst.get_unchecked_mut(0), tmp, 4);
-    }
+pub fn write_u32_be(dst: &mut [u8], input: u32) {
+    bswap::beu32::encode(dst, input);
 }
 
 /// Write a u32 into a vector, which must be 4 bytes long. The value is written in little-endian
 /// format.
-pub fn write_u32_le(dst: &mut[u8], mut input: u32) {
-    assert!(dst.len() == 4);
-    input = input.to_le();
-    unsafe {
-        let tmp = &input as *const _ as *const u8;
-        ptr::copy_nonoverlapping_memory(dst.get_unchecked_mut(0), tmp, 4);
-    }
+pub fn write_u32_le(dst: &mut[u8], input: u32) {
+    bswap::leu32::encode(dst, input);
 }
 
 /// Read a vector of bytes into a vector of u64s. The values are read in big-endian format.
 pub fn read_u64v_be(dst: &mut[u64], input: &[u8]) {
-    assert!(dst.len() * 8 == input.len());
-    unsafe {
-        let mut x = dst.get_unchecked_mut(0) as *mut u64;
-        let mut y = input.get_unchecked(0) as *const u8;
-        for _ in range(0, dst.len()) {
-            let mut tmp: u64 = mem::uninitialized();
-            ptr::copy_nonoverlapping_memory(&mut tmp as *mut _ as *mut u8, y, 8);
-            *x = Int::from_be(tmp);
-            x = x.offset(1);
-            y = y.offset(8);
-        }
-    }
+    bswap::beu64::decode_slice(dst, input);
 }
 
 /// Read a vector of bytes into a vector of u64s. The values are read in little-endian format.
 pub fn read_u64v_le(dst: &mut[u64], input: &[u8]) {
-    assert!(dst.len() * 8 == input.len());
-    unsafe {
-        let mut x = dst.get_unchecked_mut(0) as *mut u64;
-        let mut y = input.get_unchecked(0) as *const u8;
-        for _ in range(0, dst.len()) {
-            let mut tmp: u64 = mem::uninitialized();
-            ptr::copy_nonoverlapping_memory(&mut tmp as *mut _ as *mut u8, y, 8);
-            *x = Int::from_le(tmp);
-            x = x.offset(1);
-            y = y.offset(8);
-        }
-    }
+    bswap::leu64::decode_slice(dst, input);
 }
 
 /// Read a vector of bytes into a vector of u32s. The values are read in big-endian format.
 pub fn read_u32v_be(dst: &mut[u32], input: &[u8]) {
-    assert!(dst.len() * 4 == input.len());
-    unsafe {
-        let mut x = dst.get_unchecked_mut(0) as *mut u32;
-        let mut y = input.get_unchecked(0) as *const u8;
-        for _ in range(0, dst.len()) {
-            let mut tmp: u32 = mem::uninitialized();
-            ptr::copy_nonoverlapping_memory(&mut tmp as *mut _ as *mut u8, y, 4);
-            *x = Int::from_be(tmp);
-            x = x.offset(1);
-            y = y.offset(4);
-        }
-    }
+    bswap::beu32::decode_slice(dst, input);
 }
 
 /// Read a vector of bytes into a vector of u32s. The values are read in little-endian format.
 pub fn read_u32v_le(dst: &mut[u32], input: &[u8]) {
-    assert!(dst.len() * 4 == input.len());
-    unsafe {
-        let mut x = dst.get_unchecked_mut(0) as *mut u32;
-        let mut y = input.get_unchecked(0) as *const u8;
-        for _ in range(0, dst.len()) {
-            let mut tmp: u32 = mem::uninitialized();
-            ptr::copy_nonoverlapping_memory(&mut tmp as *mut _ as *mut u8, y, 4);
-            *x = Int::from_le(tmp);
-            x = x.offset(1);
-            y = y.offset(4);
-        }
-    }
+    bswap::leu32::decode_slice(dst, input);
 }
 
 /// Read the value of a vector of bytes as a u32 value in little-endian format.
 pub fn read_u32_le(input: &[u8]) -> u32 {
-    assert!(input.len() == 4);
-    unsafe {
-        let mut tmp: u32 = mem::uninitialized();
-        ptr::copy_nonoverlapping_memory(&mut tmp as *mut _ as *mut u8, input.get_unchecked(0), 4);
-        Int::from_le(tmp)
-    }
+    bswap::leu32::decode(input)
 }
 
 /// Read the value of a vector of bytes as a u32 value in big-endian format.
 pub fn read_u32_be(input: &[u8]) -> u32 {
-    assert!(input.len() == 4);
-    unsafe {
-        let mut tmp: u32 = mem::uninitialized();
-        ptr::copy_nonoverlapping_memory(&mut tmp as *mut _ as *mut u8, input.get_unchecked(0), 4);
-        Int::from_be(tmp)
-    }
+    bswap::beu32::decode(input)
 }
 
 /// XOR plaintext and keystream, storing the result in dst.

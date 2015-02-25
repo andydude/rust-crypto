@@ -19,3 +19,6 @@ opt-level = 2
 time = "*"
 rand = "*"
 rustc-serialize = "*"
+
+[dependencies.bswap]
+git = "https://github.com/andydude/rust-bswap"
